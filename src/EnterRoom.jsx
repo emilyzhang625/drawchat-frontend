@@ -1,9 +1,10 @@
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
-import store from "./store/store";
+import { useNavigate } from "react-router-dom";
 
-function Enter() {
+function EnterRoom() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const roomID = useRef(null);
 
   const handleEnter = () => {
@@ -11,7 +12,7 @@ function Enter() {
       window.alert("Please input a room ID.");
     else {
       dispatch({ type: "SET_ROOM_ID", payload: roomID.current.value });
-      console.log(store.getState());
+      navigate("/room");
       roomID.current.value = "";
     }
   };
@@ -23,4 +24,4 @@ function Enter() {
   );
 }
 
-export default Enter;
+export default EnterRoom;
