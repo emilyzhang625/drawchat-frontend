@@ -1,12 +1,15 @@
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import { useRef, useState } from "react";
 import { io } from "socket.io-client";
 
+import Canvas from "./RoomPage/Canvas";
+
 function EnterRoom() {
-  const dispatch = useDispatch();
+  //   const dispatch = useDispatch();
   const roomID = useRef(null);
   const message = useRef(null);
   const socket = io("http://localhost:3001");
+  const [showCanvas, setShowCanvas] = useState(false);
   //   const currRoom = useSelector((state) => state.room.id);
   //   console.log(currRoom);
 
@@ -16,7 +19,7 @@ function EnterRoom() {
     else {
       socket.emit("createOrJoin", roomID.current.value, (message) => {
         // dispatch({ type: "SET_ROOM_ID", payload: roomID.current.value });
-
+        setShowCanvas(true);
         window.alert(message);
       });
     }
@@ -25,7 +28,8 @@ function EnterRoom() {
   const handleLeave = () => {
     socket.emit("leaveRoom", roomID.current.value, (message) => {
       //   dispatch({ type: "REMOVE_ROOM_ID" });
-
+      roomID.current.value = "";
+      setShowCanvas(false);
       window.alert(message);
     });
   };
@@ -42,10 +46,8 @@ function EnterRoom() {
     );
   };
 
-  const [messages, setMessages] = useState([]);
   socket.on("getMessage", (message) => {
-    setMessages([...messages, message]);
-    console.log(messages);
+    console.log(message);
   });
 
   return (
@@ -55,11 +57,7 @@ function EnterRoom() {
       <button onClick={handleLeave}>Leave room</button>
       <input type="text" placeholder="Message" ref={message}></input>
       <button onClick={sendMessage}>Send</button>
-      <div>
-        {messages.map((message) => (
-          <div key={message}>{message}</div>
-        ))}
-      </div>
+      {showCanvas && <Canvas socket={socket} roomID={roomID.current.value} />}
     </div>
   );
 }

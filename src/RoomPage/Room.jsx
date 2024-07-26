@@ -1,4 +1,4 @@
-import DrawingCanvas from "./DrawingCanvas";
+import DrawingCanvas from "./Canvas";
 function Room() {
   return <DrawingCanvas />;
 }
