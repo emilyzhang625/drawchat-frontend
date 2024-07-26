@@ -1,10 +1,9 @@
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 function EnterRoom() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const roomID = useRef(null);
 
   const handleEnter = () => {
@@ -12,7 +11,8 @@ function EnterRoom() {
       window.alert("Please input a room ID.");
     else {
       dispatch({ type: "SET_ROOM_ID", payload: roomID.current.value });
-      navigate("/room");
+      const socket = io("http://localhost:3001");
+      socket.emit("createOrJoin", roomID.current.value);
       roomID.current.value = "";
     }
   };
