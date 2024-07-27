@@ -49,6 +49,7 @@ function EnterRoom() {
     <div>
       {!showLeave && (
         <div className="enter-container">
+          <div className="title">DrawChat</div>
           <div className="join-room">
             <input
               type="text"
