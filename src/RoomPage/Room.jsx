@@ -12,15 +12,21 @@ function EnterRoom() {
   const socket = getSocket();
   const [showLeave, setShowLeave] = useState(false);
   const currRoom = useSelector((state) => state.room.id);
+  const numUsers = useSelector((state) => state.room.users);
 
   const handleEnter = () => {
     if (roomID.current.value.trim().length === 0)
       window.alert("Please input a room ID.");
     else {
       dispatch({ type: "SET_ROOM_ID", payload: roomID.current.value });
-      socket.emit("createOrJoin", roomID.current.value, (message) => {
-        dispatch({ type: "SEND_MESSAGE", payload: message });
-      });
+      socket.emit(
+        "createOrJoin",
+        roomID.current.value,
+        socket.id,
+        (message) => {
+          dispatch({ type: "SEND_MESSAGE", payload: message });
+        }
+      );
       setShowLeave(true);
     }
   };
@@ -34,14 +40,23 @@ function EnterRoom() {
   };
 
   const sendMessage = () => {
-    socket.emit("sendMessage", currRoom, message.current.value);
-    dispatch({ type: "SEND_MESSAGE", payload: message.current.value });
-    message.current.value = "";
+    if (socket.id) {
+      socket.emit("sendMessage", currRoom, socket.id, message.current.value);
+      dispatch({
+        type: "SEND_MESSAGE",
+        payload: `You: ${message.current.value}`,
+      });
+      message.current.value = "";
+    }
   };
 
   useEffect(() => {
     socket.on("getMessage", (message) => {
       dispatch({ type: "GET_MESSAGE", payload: message });
+    });
+
+    socket.on("updateSize", (newSize) => {
+      dispatch({ type: "SET_ROOM_SIZE", payload: newSize });
     });
   }, []);
 
@@ -64,7 +79,11 @@ function EnterRoom() {
       {showLeave && (
         <div className="room">
           <div className="sidebar">
-            <button onClick={handleLeave}>Leave room {currRoom}</button>
+            <button onClick={handleLeave}>
+              Leave room {currRoom} {"(active users: "}
+              {numUsers}
+              {")"}
+            </button>
             <div className="send-message">
               <input type="text" placeholder="Message" ref={message}></input>
               <button onClick={sendMessage}>Send</button>

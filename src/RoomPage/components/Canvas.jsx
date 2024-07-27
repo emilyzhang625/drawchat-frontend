@@ -75,8 +75,7 @@ function Canvas() {
   };
 
   const clear = () => {
-    if (canvas.current == null) console.log("canvas is null");
-    else {
+    if (canvas.current) {
       context.current.clearRect(
         0,
         0,
