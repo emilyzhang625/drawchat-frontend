@@ -1,57 +1,54 @@
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import getSocket from "../../services/socket";
 
-function Canvas({ socket, roomID }) {
+function Canvas() {
   const dispatch = useDispatch();
   const canvas = useRef(null);
   const shouldDraw = useSelector((state) => state.canvas.mouseDown);
+  const roomID = useSelector((state) => state.room.id);
+  const socket = getSocket();
+  const context = useRef(null);
 
   useEffect(() => {
     canvas.current.width = window.innerWidth;
     canvas.current.height = window.innerHeight;
+    context.current = canvas.current.getContext("2d");
   }, [canvas]);
 
   useEffect(() => {
     socket.on("drawing", (data) => {
-      const context = canvas.current.getContext("2d");
-      context.lineTo(data.x, data.y);
-      context.stroke();
+      context.current.lineTo(data.x, data.y);
+      context.current.stroke();
     });
 
     socket.on("startDrawing", (data) => {
-      console.log("start drawing pls");
-      const context = canvas.current.getContext("2d");
-      context.beginPath();
-      context.moveTo(data.x, data.y);
+      context.current.beginPath();
+      context.current.moveTo(data.x, data.y);
     });
 
     socket.on("endDrawing", () => {
-      const context = canvas.current.getContext("2d");
-      context.closePath();
+      context.current.closePath();
     });
   }, []);
 
   const updateCoords = (event) => {
     if (shouldDraw) {
-      const context = canvas.current.getContext("2d");
-      context.lineTo(event.clientX, event.clientY);
-      context.stroke();
-
+      context.current.lineTo(event.clientX, event.clientY);
+      context.current.stroke();
       socket.emit("draw", roomID, { x: event.clientX, y: event.clientY });
     }
   };
 
   const startPath = (event) => {
-    const context = canvas.current.getContext("2d");
-    context.beginPath();
-    context.moveTo(event.clientX, event.clientY);
+    context.current.beginPath();
+    context.current.moveTo(event.clientX, event.clientY);
     socket.emit("startDraw", roomID, { x: event.clientX, y: event.clientY });
     dispatch({ type: "MOUSE_IS_DOWN" });
   };
 
   const endPath = () => {
-    const context = canvas.current.getContext("2d");
-    context.closePath();
+    context.current.closePath();
     socket.emit("endDraw", roomID);
     dispatch({ type: "MOUSE_IS_UP" });
   };
