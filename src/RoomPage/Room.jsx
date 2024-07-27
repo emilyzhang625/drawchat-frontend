@@ -3,6 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import getSocket from "../services/socket";
 import Messages from "./components/Messages";
 import Canvas from "./components/Canvas";
+import "./Room.css";
 
 function EnterRoom() {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ function EnterRoom() {
     socket.emit("leaveRoom", currRoom);
     dispatch({ type: "REMOVE_ROOM_ID" });
     dispatch({ type: "CLEAR_MESSAGES" });
-    roomID.current.value = "";
+    if (roomID.current) roomID.current.value = "";
     setShowLeave(false);
   };
 
@@ -48,7 +49,7 @@ function EnterRoom() {
   return (
     <div>
       {!showLeave && (
-        <div>
+        <div className="join-room">
           <input
             type="text"
             placeholder="Room ID"
