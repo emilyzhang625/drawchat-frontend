@@ -71,7 +71,8 @@ function Canvas() {
 
   const handleClear = () => {
     clear();
-    socket.emit("clearDraw", roomID);
+    dispatch({ type: "SEND_MESSAGE", payload: "You cleared canvas" });
+    socket.emit("clearDraw", roomID, socket.id);
   };
 
   const clear = () => {
