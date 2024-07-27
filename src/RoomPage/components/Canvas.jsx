@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import getSocket from "../../services/socket";
 import "./Canvas.css";
-import getPos from "./coords";
+import { getPos } from "./coords";
 
 function Canvas() {
   const dispatch = useDispatch();
@@ -13,12 +13,9 @@ function Canvas() {
   const context = useRef(null);
 
   useEffect(() => {
-    canvas.current.width = window.innerWidth;
-    canvas.current.height = window.innerHeight;
     context.current = canvas.current.getContext("2d");
-  }, [canvas]);
+    resize();
 
-  useEffect(() => {
     socket.on("drawing", (data) => {
       context.current.lineTo(data.x, data.y);
       context.current.stroke();
@@ -32,7 +29,11 @@ function Canvas() {
     socket.on("endDrawing", () => {
       context.current.closePath();
     });
-  }, []);
+
+    socket.on("clearDrawing", () => {
+      clear();
+    });
+  }, [canvas]);
 
   const updateCoords = (event) => {
     if (shouldDraw) {
@@ -63,6 +64,28 @@ function Canvas() {
     dispatch({ type: "MOUSE_IS_UP" });
   };
 
+  const resize = () => {
+    canvas.current.width = 0.55 * window.innerWidth;
+    canvas.current.height = 0.8 * window.innerHeight;
+  };
+
+  const handleClear = () => {
+    clear();
+    socket.emit("clearDraw", roomID);
+  };
+
+  const clear = () => {
+    if (canvas.current == null) console.log("canvas is null");
+    else {
+      context.current.clearRect(
+        0,
+        0,
+        canvas.current.width,
+        canvas.current.height
+      );
+    }
+  };
+
   return (
     <div className="canvas-container">
       <canvas
@@ -71,6 +94,7 @@ function Canvas() {
         onMouseUp={endPath}
         onMouseMove={updateCoords}
       ></canvas>
+      <button onClick={handleClear}>Clear</button>
     </div>
   );
 }

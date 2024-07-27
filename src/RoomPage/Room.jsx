@@ -19,7 +19,7 @@ function EnterRoom() {
     else {
       dispatch({ type: "SET_ROOM_ID", payload: roomID.current.value });
       socket.emit("createOrJoin", roomID.current.value, (message) => {
-        window.alert(message);
+        dispatch({ type: "SEND_MESSAGE", payload: message });
       });
       setShowLeave(true);
     }
@@ -35,36 +35,40 @@ function EnterRoom() {
 
   const sendMessage = () => {
     socket.emit("sendMessage", currRoom, message.current.value);
-    dispatch({ type: "ADD_MESSAGE", payload: message.current.value });
+    dispatch({ type: "SEND_MESSAGE", payload: message.current.value });
     message.current.value = "";
   };
 
   useEffect(() => {
     socket.on("getMessage", (message) => {
-      console.log("getting message!, abt to dispatch");
-      dispatch({ type: "ADD_MESSAGE", payload: message });
+      dispatch({ type: "GET_MESSAGE", payload: message });
     });
   }, []);
 
   return (
     <div>
       {!showLeave && (
-        <div className="join-room">
-          <input
-            type="text"
-            placeholder="Room ID"
-            ref={roomID}
-            required
-          ></input>
-          <button onClick={handleEnter}>Create/Join room</button>
+        <div className="enter-container">
+          <div className="join-room">
+            <input
+              type="text"
+              placeholder="Room ID"
+              ref={roomID}
+              required
+            ></input>
+            <button onClick={handleEnter}>Create/Join room</button>
+          </div>
         </div>
       )}
       {showLeave && (
         <div className="room">
           <div className="sidebar">
-            <button onClick={handleLeave}>Leave room</button>
-            <input type="text" placeholder="Message" ref={message}></input>
-            <button onClick={sendMessage}>Send</button>
+            <button onClick={handleLeave}>Leave room {currRoom}</button>
+            <div className="send-message">
+              <input type="text" placeholder="Message" ref={message}></input>
+              <button onClick={sendMessage}>Send</button>
+            </div>
+            <hr></hr>
             <Messages />
           </div>
           <Canvas className="canvas" />
