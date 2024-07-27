@@ -60,12 +60,14 @@ function EnterRoom() {
         </div>
       )}
       {showLeave && (
-        <div>
-          <button onClick={handleLeave}>Leave room</button>
-          <input type="text" placeholder="Message" ref={message}></input>
-          <button onClick={sendMessage}>Send</button>
-          <Messages />
-          <Canvas />
+        <div className="room">
+          <div className="sidebar">
+            <button onClick={handleLeave}>Leave room</button>
+            <input type="text" placeholder="Message" ref={message}></input>
+            <button onClick={sendMessage}>Send</button>
+            <Messages />
+          </div>
+          <Canvas className="canvas" />
         </div>
       )}
     </div>
